@@ -33,8 +33,9 @@ if(ESP_PLATFORM)
                                 src/pixled/platform/esp/led_strip_bus.cpp
                                 src/pixled/platform/esp/ddp_esp.cpp
                                 src/pixled/platform/esp/output_task_esp.cpp
+                                src/pixled/platform/esp/relay_esp.cpp
                            INCLUDE_DIRS "src"
-                           PRIV_REQUIRES esp_timer lwip)
+                           PRIV_REQUIRES esp_timer lwip esp_driver_gpio)
     if(PIXLED_TESSERAPI AND PIXLED_TESSERKIT)
         foreach(dep ${PIXLED_TESSERAPI} ${PIXLED_TESSERKIT})
             idf_component_get_property(lib ${dep} COMPONENT_LIB)

@@ -90,6 +90,9 @@ extern "C" void app_main() {
         tesser::Lock lock(api);
         controller.begin(board.boot());
         const pixled::Board& b = board.board();
+        // The strips' supply, through the board's relay: on for now; off
+        // while dark is phase 2's (DESIGN section 5.6).
+        pixled::setRelay(b, true);
         if (b.buttonGpio >= 0) {
             tesserkit::Pins* pins = dev.platform().pins ? dev.platform().pins : tesserkit::espPins();
             auto pull = b.buttonActiveLow ? tesserkit::Pins::Pull::Up : tesserkit::Pins::Pull::Down;

@@ -2,6 +2,7 @@
 // strips through Espressif's led_strip, the output task, DDP's socket.
 #pragma once
 
+#include "pixled/board.h"
 #include "pixled/controller.h"
 #include "pixled/pixel_bus.h"
 
@@ -13,6 +14,10 @@ PixelBus& espBus();
 // The output task: on core 1, polling the controller whenever a frame
 // closes, and every tick for timeouts and test patterns. Once.
 bool startOutputTask(Controller& controller);
+
+// The board's relay, switching the strips' supply: on or off, in its
+// polarity. False without one.
+bool setRelay(const Board& board, bool on);
 
 // DDP on UDP 4048, into the controller's frames while its /inputs/ddp is on.
 // Once, after Device::begin().
