@@ -40,7 +40,9 @@ CONFIG_LWIP_AUTOIP=y
 CONFIG_ETH_DMA_RX_BUFFER_NUM=28
 CONFIG_ETH_DMA_BUFFER_SIZE=768
 CONFIG_LWIP_UDP_RECVMBOX_SIZE=32
-CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=64
+# lwIP's input queue as in those runs: at 64 it could hold ~48 KB of pbufs
+# (heap) at a burst's peak on top of the socket's ~24 KB.
+CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=32
 # 160 MHz lost a few frames every 20 s in that test; 240 MHz did better.
 CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
 # The RMT's interrupt from IRAM, so a flash write (a settings save) doesn't
