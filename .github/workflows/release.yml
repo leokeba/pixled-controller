@@ -55,6 +55,9 @@ jobs:
       project: firmware
       name: pixled
       dependencies-file: deps.lock
+      # ESP-IDF 6.1 rather than firmware.yml's 5.5 default: more heap for the
+      # pixels and TLS (docs/DESIGN.md section 4.3; Leo, 2026-10-23).
+      idf-version: release-v6.1
       # Room for the next update in the 1.75 MB slot of the files table.
       min-free: 16384
 
