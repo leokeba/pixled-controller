@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Reach a Pixled controller over USB or the network, or install its firmware on a board: TesserUI's launcher." />
+    <title>Pixled</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='3' y='13' width='6' height='6' rx='1.5' fill='%23ef4444'/><rect x='13' y='13' width='6' height='6' rx='1.5' fill='%2322c55e'/><rect x='23' y='13' width='6' height='6' rx='1.5' fill='%233b82f6'/></svg>" />
+  </head>
+  <body>
+    <!-- TesserUI's bundle, published by .github/workflows/release.yml with the
+         firmware it serves, and built into the bridge's executables. A
+         launcher: it opens ?api=, or the controller the user picks (TesserUI's
+         DESIGN.md section 9.7). It installs the latest releases over USB,
+         which the workflow copies next to it, then sets up the controller's
+         Wi-Fi (section 9.7.1). -->
+    <script>
+      window.TESSER = {
+        launcher: true,
+        title: 'Pixled',
+        firmware: {
+          images: [
+            {
+              label: 'Pixled controller',
+              asset: 'pixled-{target}-factory.bin',
+              description:
+                'A classic ESP32 driving addressable LED strips from Art-Net, sACN and DDP: GLEDOPTO Elite controllers and other boards. Installing resets the settings; choose the board afterwards (Board).',
+            },
+          ],
+          wifi: '/sys/network/wifi',
+        },
+        // Nearby links to the bridge's executables on this repository's
+        // latest release (release.yml's bridge job).
+        bridge: { repo: 'leokeba/pixled-controller', name: 'pixled-bridge' },
+      };
+    </script>
+    <script src="ui.js"></script>
+  </body>
+</html>
