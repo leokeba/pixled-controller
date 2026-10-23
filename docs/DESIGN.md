@@ -49,7 +49,7 @@ From Gledopto's manuals (2026-10-23; to check on each board before trusting):
 | Elite 2D-EXMU | GL-C-616WL | digital: GPIO 16, 2 | 5–24 V | relay 18 (active low), spare IO13 |
 | Elite 4D-EXMU | GL-C-618WL | digital: GPIO 16, 12, 4, 2 | 5–24 V | relay 18 (active low), button 17, spare IO13 |
 | Elite 6D-EXMU | GL-C-619WL | digital: GPIO 16, 14, 13, 12, 4, 2 | 5–48 V | relay 18 (active low), button 17; Gledopto recommends ≤ 1600 chips |
-| Elite 1D2P-EXMU | GL-C-620WL | 1 digital + 2 PWM (pins not documented: read from the board) | 5–24 V | relay, button |
+| Elite 1D2P-EXMU | GL-C-620WL | digital: GPIO 16; PWM: 4, 2 (to check: a retailer's listing) | 5–24 V | relay 18 (active high in the WLED it shipped with), button 17. From that WLED's `cfg.json` (2026-10-23, the board 48:9d:31:c5:ce:48's stock flash): one WS2812 bus on 16, the button on 17 pulled up, the relay on 18 not inverted, Gledopto's Ethernet |
 | Elite 5P-EXMU | GL-C-611WL | PWM: GPIO 18, 16, 12, 4, 2 (ballet-photophonique's DESIGN §3) | 5–48 V | button 17, spare IO13; no relay on 18, which is an output |
 
 - **GPIO 12 and 2 are strapping pins** (GPIO 12 high at reset selects 1.8 V flash and the chip doesn't boot): the outputs are attached after boot, and idle low.
@@ -76,7 +76,7 @@ The firmware knows no board; a board file says what is wired where (Leo, 2026-10
 - `ethernet`: one of TesserKIT's presets (`gledopto`, `wt32-eth01`, `olimex-esp32-poe`, `esp32-ethernet-kit`) or none; a W5500's pins *(later)*. Its pins are reserved, and it is applied at boot: TesserKIT's `net.ethernet(choose)` asks for the board once the settings are loaded (`BoardChoice::ethernet()`). While no board is chosen, the Gledopto's wiring, so a fresh Elite controller is reached on its cable; a board file without `ethernet` has none.
 - `outputs`: up to 8, `digital` (a strip's data line) or `pwm` (a low-side channel, §5.7). Their order is the outputs' numbering in the tree.
 - `relay`, `button`: optional.
-- **Presets** for the boards of §3.1 are compiled in (`board.cpp`, the JSON as text), but the 1D2P's (§12); `/board/preset` chooses one. A **custom** board file is `/board/custom` (stored, ≤ 1023 characters), used when the preset is `custom`. A fresh controller has no board: its outputs do nothing until one is chosen and it restarts; the launcher could choose at install time *(later)*.
+- **Presets** for the boards of §3.1 are compiled in (`board.cpp`, the JSON as text), the 1D2P's since 2026-10-23; `/board/preset` chooses one. A **custom** board file is `/board/custom` (stored, ≤ 1023 characters), used when the preset is `custom`. A fresh controller has no board: its outputs do nothing until one is chosen and it restarts; the launcher could choose at install time *(later)*.
 - **Validation** before anything is applied, on the classic ESP32's pins: known keys, GPIOs that exist and can drive an output (34–39 are inputs, fit for a button only), not GPIO 0 (a strapping pin and the Ethernet clock), not the flash's (6–11), not the Ethernet preset's (RMII, MDC, MDIO, power, clock), none twice, at most 8 outputs. A refused `/board/custom` changes nothing and says why (`output 1: GPIO 23 is Ethernet's`).
 - **A new board applies at the next restart**, which `/board/restartNeeded` says; `/board/active` is the one in use, `/board/error` why there is none. The outputs' settings (§6) are kept, matched by index.
 
@@ -191,7 +191,7 @@ Persisted nodes are marked *(p)*. Writes to `/outputs`, `/inputs` and `/power` n
   testColour            "#rrggbb", while test is colour
   error                 read-only, a warning while not empty: outputs cut to the memory budget, more than the board has
   status/               inline, watched: fps, frames (advanced), dropped
-/inputs                 label "Inputs", ui.icon "network"
+/inputs                 label "Inputs", ui.icon "broadcast"
   artnet (p), sacn (p), ddp (p)   booleans, true: each protocol's pixels (TesserKIT's services, /sys/artnet and
                         /sys/sacn, keep their own switches and mappings)
   onLoss (p)            hold | black | test
@@ -201,7 +201,7 @@ Persisted nodes are marked *(p)*. Writes to `/outputs`, `/inputs` and `/power` n
                         syncs (advanced)
 /power                  label "Power", ui.icon "bolt"
   brightness (p)        0–100 %
-/board                  label "Board", Admin, group "Hardware"
+/board                  label "Board", ui.icon "layers", Admin, group "Hardware"
   preset (p)            none | gledopto-elite-2d | -4d | -6d | -5p | custom
   custom (p)            a board file (≤ 1023 characters), validated, while preset is custom
   active                the board in use since boot: its name, or none
@@ -260,7 +260,7 @@ A gap goes to the lowest layer, asked of its agent with Leo's go-ahead; no worka
 ## 12. Open questions
 
 - **The driver library** (§5.3). Candidates as of 2026-10-23: Espressif's `led_strip` (ESP-IDF's component registry, 3.x; RMT or SPI backends, one strip per instance, DMA only where the chip's RMT has it: not the classic ESP32); FastLED (very active; RMT through `led_strip` on ESP-IDF 5, and an I2S parallel driver for many strips of one timing on the classic ESP32, but Arduino-first, and much larger than a strip driver now); NeoPixelBus (what WLED ships on these very boards, I2S parallel included; needs the Arduino core); hpwit's I2SClocklessLedDriver (I2S parallel, small, few users). Proposed, and begun (2026-10-23: the firmware is on `led_strip`): measured on a 4D-class board under the phase 1 load; if it glitches, FastLED's or NeoPixelBus's I2S parallel driver, which then decides whether this firmware takes Arduino as a component (flash, and ESP-IDF versions tied to Arduino-ESP32's).
-- **The 1D2P's pins** aren't in its manual: read them from a board (or its WLED configuration) before writing its preset.
+- **The 1D2P's PWM pins** (4 and 2) come from a retailer's listing: the terminals' labels on the case will tell (phase 3 uses them).
 - **Boards on hand:** the Gledopto boards in TesserKIT's notes are 5P (GL-C-611WL, PWM only) and one of unknown model; a digital Elite (2D, 4D, 6D) is needed for phase 1.
 - The device's label "Pixled" (hostname `pixled-xxxx`) is assumed. The repository is public at `leokeba/pixled-controller`, MIT as the siblings (Leo, 2026-10-23).
 - **A board at install time:** the launcher could ask which board and write `/board/preset` after flashing, or Gledopto's model could be guessed from WLED's stored configuration before it's erased.

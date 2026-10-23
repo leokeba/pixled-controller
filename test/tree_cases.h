@@ -55,4 +55,5 @@ TEST(tree_board) {
     // In use until a restart.
     CHECK_EQ(r.get("/board/active").body, "\"Gledopto Elite 4D-EXMU\"");
     CHECK(r.set("/board/preset", "\"gledopto-elite-9d\"").status == Status::InvalidValue);
+    CHECK(r.set("/board/preset", "\"gledopto-elite-1d2p\"").status == Status::Ok);
 }

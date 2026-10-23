@@ -53,7 +53,7 @@ const Preset* findPreset(std::string_view id);
 
 // /board's choice: none, a preset (presets()' order), or a custom file. The
 // order of the enumerators is the tree's.
-enum class BoardPreset : uint8_t { None, Elite2d, Elite4d, Elite6d, Elite5p, Custom };
+enum class BoardPreset : uint8_t { None, Elite2d, Elite4d, Elite6d, Elite5p, Elite1d2p, Custom };
 
 struct BoardChoice {
     BoardPreset preset = BoardPreset::None;

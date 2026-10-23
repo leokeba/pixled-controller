@@ -43,6 +43,12 @@ TEST(board_presets_parse) {
     parseBoard(pixled::findPreset("gledopto-elite-5p")->json, p5, error);
     CHECK_EQ(p5.outputs.size(), 5u);
     CHECK_EQ(p5.digitalOutputs(), 0u);
+    Board d2p;
+    parseBoard(pixled::findPreset("gledopto-elite-1d2p")->json, d2p, error);
+    CHECK_EQ(d2p.digitalOutputs(), 1u);
+    CHECK_EQ(d2p.outputs[0].gpio, 16);
+    CHECK_EQ(d2p.outputs.size(), 3u);
+    CHECK(!d2p.relayActiveLow);
     CHECK(pixled::findPreset("nope") == nullptr);
 }
 

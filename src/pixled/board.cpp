@@ -11,8 +11,9 @@ namespace pixled {
 namespace {
 
 // GLEDOPTO's Elite controllers, from their manuals (2026-10-23): to check on
-// each board before trusting (docs/DESIGN.md section 3.1). The 1D2P's pins
-// aren't documented yet.
+// each board before trusting (docs/DESIGN.md section 3.1). The 1D2P's from
+// the WLED it shipped with (its cfg.json: the strip on 16, the button on 17,
+// the relay on 18 not inverted), its PWM pins from a retailer's listing.
 const char kElite2d[] = R"({"name":"Gledopto Elite 2D-EXMU","ethernet":"gledopto",
 "outputs":[{"gpio":16},{"gpio":2}],"relay":{"gpio":18,"activeLow":true}})";
 
@@ -22,6 +23,9 @@ const char kElite4d[] = R"({"name":"Gledopto Elite 4D-EXMU","ethernet":"gledopto
 const char kElite6d[] = R"({"name":"Gledopto Elite 6D-EXMU","ethernet":"gledopto",
 "outputs":[{"gpio":16},{"gpio":14},{"gpio":13},{"gpio":12},{"gpio":4},{"gpio":2}],
 "relay":{"gpio":18,"activeLow":true},"button":{"gpio":17}})";
+
+const char kElite1d2p[] = R"({"name":"Gledopto Elite 1D2P-EXMU","ethernet":"gledopto",
+"outputs":[{"gpio":16},{"gpio":4,"kind":"pwm"},{"gpio":2,"kind":"pwm"}],"relay":{"gpio":18},"button":{"gpio":17}})";
 
 const char kElite5p[] = R"({"name":"Gledopto Elite 5P-EXMU","ethernet":"gledopto",
 "outputs":[{"gpio":18,"kind":"pwm"},{"gpio":16,"kind":"pwm"},{"gpio":12,"kind":"pwm"},{"gpio":4,"kind":"pwm"},
@@ -69,6 +73,7 @@ const std::vector<Preset>& presets() {
         {"gledopto-elite-4d", kElite4d},
         {"gledopto-elite-6d", kElite6d},
         {"gledopto-elite-5p", kElite5p},
+        {"gledopto-elite-1d2p", kElite1d2p},
     };
     return list;
 }

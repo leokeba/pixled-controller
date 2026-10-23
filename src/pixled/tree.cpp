@@ -134,7 +134,8 @@ void describePower(Object& o, Controller& c) {
 void describeBoard(Object& o, BoardSelection& b) {
     o.writeAccess(Access::Admin);
     o.value("preset", b.choice.preset,
-            {"none", "gledopto-elite-2d", "gledopto-elite-4d", "gledopto-elite-6d", "gledopto-elite-5p", "custom"})
+            {"none", "gledopto-elite-2d", "gledopto-elite-4d", "gledopto-elite-6d", "gledopto-elite-5p",
+             "gledopto-elite-1d2p", "custom"})
         .persist()
         .doc("The board's wiring: a GLEDOPTO Elite controller, or custom (a board file below)");
     o.value("custom", b.choice.custom)
@@ -165,9 +166,9 @@ void describeBoard(Object& o, BoardSelection& b) {
 
 void mountTree(tesser::Api& api, Controller& controller, BoardSelection& board) {
     describeOutputs(api.object("outputs").label("Outputs").ui("icon", "bulb"), controller);
-    describeInputs(api.object("inputs").label("Inputs").ui("icon", "network"), controller);
+    describeInputs(api.object("inputs").label("Inputs").ui("icon", "broadcast"), controller);
     describePower(api.object("power").label("Power").ui("icon", "bolt"), controller);
-    describeBoard(api.object("board").label("Board").ui("icon", "chip").ui("group", "Hardware"), board);
+    describeBoard(api.object("board").label("Board").ui("icon", "layers").ui("group", "Hardware"), board);
 }
 
 }  // namespace pixled
