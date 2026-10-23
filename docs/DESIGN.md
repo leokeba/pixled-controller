@@ -162,7 +162,7 @@ The classic ESP32 without PSRAM: TesserKIT's `classic-gledopto` build had 88–9
 
 - `/power/brightness` (0–100 %, stored, default 100) scales every frame (`v · (b · 2.55 + 1) / 256`: 100 % leaves it as it is), with dithering *(later)*. A change redraws the last frame at once.
 - **Current limit** *(phase 2)*: `/power/maxCurrent` (A, default 0: none) against an estimate per chip (`mAPerChannel` at full, `mAIdle`), the frame scaled down when over it; `/power/current` shows the estimate. Gledopto's 15 A total and the user's supply are the user's to set.
-- **Relay**: switched on at boot when the board has one (`platform/esp/relay_esp.cpp`, in its `activeLow` polarity), since its strips have no supply otherwise: the 1D2P stayed dark with data flowing until it was (2026-10-23). *(Phase 2)*: on while any output has a lit pixel, off after `/power/relayOffDelay` (default 5 s) of black; always on while `/power/relay` is `on`, never with `off` (`auto` default). The first frame after the relay switches on waits the chips' power-up (100 ms).
+- **Relay**: switched on at boot when the board has one (`platform/esp/relay_esp.cpp`, in its `activeLow` polarity), since its strips have no supply otherwise: the 1D2P stayed dark with data flowing until it was, then lit as sent (Leo, 2026-10-23). *(Phase 2)*: on while any output has a lit pixel, off after `/power/relayOffDelay` (default 5 s) of black; always on while `/power/relay` is `on`, never with `off` (`auto` default). The first frame after the relay switches on waits the chips' power-up (100 ms).
 
 ### 5.7 PWM outputs
 
@@ -237,6 +237,7 @@ A gap goes to the lowest layer, asked of its agent with Leo's go-ahead; no worka
 | **A function button** as a TesserKIT class (as `PwmOutput` is): a GPIO, active low with the pull-up or high with the pull-down, sampled every tick, debounced, short presses on release and long ones once while held; perhaps a long hold for the factory reset | TesserKIT | §5.8 | done, TesserKIT bb6a4ed: `tesserkit::Button` (Short, Long, an optional VeryLong), ours removed |
 | **The release check's real peak:** with Wi-Fi and Ethernet up, TLS took 55–63 KB (the lowest heap 1.2 KB) beside Firmware's 36 KB reservation; refuse a check that can't afford it, and a factory default for `autoCheck` (off, for show devices) | TesserKIT | §10 | sent 2026-10-23 to tesserkit-35 |
 | The launcher's flasher never reset a board after writing it (esptool-js 0.7's hard reset doesn't assert RTS): a Gledopto stayed in the flasher, "not reachable through serial" | TesserUI | §8 | done, TesserUI e17a101 (pinned): DTR false, RTS true 100 ms, RTS false; checked on the 1D2P |
+| A notification built on an exhausted heap aborted (`Api::emitEvent` growing a string with plain `operator new`), found by tesserkit-35 in a DMX load test on the 1D2P | TesserAPI | §4.3 | done, TesserAPI b74a48a (pinned, ahead of TesserKIT's fd077c5): notifications wait rather than abort |
 | A validator's refusal with a message it composes (`Check` keeps a `const char*`): `/board/custom` keeps its message in a static string meanwhile | TesserAPI | §3.2 | to consider; not asked |
 | A board file's GPIOs checked against what the platform reserves (flash, PSRAM, Ethernet, strapping) | TesserKIT | §3.2 | not asked: here first (mentioned to tesserkit-6c, 2026-10-23) |
 
