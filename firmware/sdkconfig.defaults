@@ -1,0 +1,48 @@
+# TesserKIT's partition table with a filesystem: two OTA slots, LittleFS for
+# Files (the settings), a core dump. NVS where the table without one has it.
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="../../TesserKIT/partitions/tesserkit_4mb_files.csv"
+# A new image rolls back unless it confirms itself (/sys/firmware).
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+# Crashes leave a core dump, downloadable at /sys/coredump.
+CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=y
+# WebSocket for the interface's subscriptions.
+CONFIG_HTTPD_WS_SUPPORT=y
+# The serial API's UART drains its 128-byte FIFO from IRAM, so a flash write
+# (which disables the cache) can't make it lose received bytes: a firmware
+# upload over the launcher's USB way (TesserKIT's full example, 2026-10-15).
+CONFIG_UART_ISR_IN_IRAM=y
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=1024
+# HTTP (7 connections), DNS, downloads, UDP's API, DDP.
+CONFIG_LWIP_MAX_SOCKETS=16
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+# Size over debuggability, as shipped firmware is built.
+CONFIG_COMPILER_OPTIMIZATION_SIZE=y
+# The console's UART also carries the API (the launcher's USB way): the
+# launcher skips log lines, but one written in the middle of a reply breaks it.
+CONFIG_LOG_DEFAULT_LEVEL_WARN=y
+# TesserKIT's classic profile: no Bluetooth (its controller and NimBLE take
+# about 48 KB of heap the pixels need).
+CONFIG_BT_ENABLED=n
+# The access point is open or WPA2: its WPA3 and OWE support is never used.
+CONFIG_ESP_WIFI_SOFTAP_SAE_SUPPORT=n
+CONFIG_ESP_WIFI_ENABLE_WPA3_OWE_SOFTAP=n
+# Ethernet without a DHCP server (a cable straight to a computer): a
+# link-local address (169.254/16) while DHCP keeps asking.
+CONFIG_LWIP_AUTOIP=y
+# Bursts of pixel data: a frame of 24 universes arrives back to back. With
+# ESP-IDF's defaults a Gledopto lost two thirds of them at 44 fps: the EMAC's
+# ten 512-byte DMA buffers (5 frames) and the socket's mailbox (6 datagrams)
+# overflow. With these, six runs of eight lost nothing, the others 0.04 % of
+# sACN frames (tesserkit-6c, 2026-10-23, TesserKIT's test/e2e_dmx.py; DESIGN
+# section 4.3). The DMA buffers cost 21.5 KB of static RAM rather than 5 KB.
+CONFIG_ETH_DMA_RX_BUFFER_NUM=28
+CONFIG_ETH_DMA_BUFFER_SIZE=768
+CONFIG_LWIP_UDP_RECVMBOX_SIZE=32
+CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=64
+# 160 MHz lost a few frames every 20 s in that test; 240 MHz did better.
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+# The RMT's interrupt from IRAM, so a flash write (a settings save) doesn't
+# hold a strip's refill: a glitch otherwise.
+CONFIG_RMT_ISR_IRAM_SAFE=y

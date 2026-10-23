@@ -1,0 +1,10 @@
+# The sibling commits the controller builds against: the host build
+# (CMakeLists.txt warns when a checkout beside this repository isn't one),
+# the firmware CI releases, the launcher and the bridge
+# (.github/workflows/release.yml). One owner/repo@sha per line, TesserKIT's
+# own deps.lock for the ones it shares. Update it with scripts/pin.sh, after
+# the siblings' commits are pushed, and commit it with the change that needs
+# them.
+leokeba/TesserAPI@fd077c5e5f698cebcb09c74affdb7a3b257eb838
+leokeba/TesserUI@9141685a53e2e6576eb1d9c7435a8c404e2b9f1c
+leokeba/TesserKIT@969107f1c7767803b05fa63475c972de43c94456
