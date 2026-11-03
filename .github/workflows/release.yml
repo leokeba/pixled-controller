@@ -39,6 +39,9 @@ jobs:
             git -C "$dir" checkout -q FETCH_HEAD
             echo "$repo $(git -C "$dir" rev-parse --short HEAD)"
           done
+      - name: Check pinned workflow refs
+        working-directory: pixled-controller
+        run: scripts/pin.sh --check
       - name: Build and run tests (ASan + UBSan)
         working-directory: pixled-controller
         run: |
@@ -50,11 +53,12 @@ jobs:
     needs: host-tests
     permissions:
       contents: write
-    uses: leokeba/TesserKIT/.github/workflows/firmware.yml@main
+    uses: leokeba/TesserKIT/.github/workflows/firmware.yml@4dafe71d70338670f4a06fd838e3c93ad513b0d4
     with:
       project: firmware
       name: pixled
       dependencies-file: deps.lock
+      targets: '["esp32"]'
       # ESP-IDF 6.1 rather than firmware.yml's 5.5 default: more heap for the
       # pixels and TLS (docs/DESIGN.md section 4.3; Leo, 2026-10-23).
       idf-version: release-v6.1
@@ -71,7 +75,7 @@ jobs:
     needs: firmware
     permissions:
       contents: write
-    uses: leokeba/TesserUI/.github/workflows/bridge.yml@main
+    uses: leokeba/TesserUI/.github/workflows/bridge.yml@a08af930d4e612a898ff3d3c0e805d3a3581cf1f
     with:
       page: pages/index.html
       name: pixled-bridge

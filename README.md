@@ -25,7 +25,7 @@ Each push to `main` publishes a release. A controller online checks for a new on
 
 ## Build
 
-The libraries are checkouts next to this repository, at the commits [`deps.lock`](deps.lock) pins (`scripts/pin.sh` updates it): TesserAPI, TesserUI, TesserKIT.
+The libraries are checkouts next to this repository, at the commits [`deps.lock`](deps.lock) pins (`scripts/pin.sh` updates the pins and reusable workflow refs; `scripts/pin.sh --check` verifies them): TesserAPI, TesserUI, TesserKIT.
 
 ```sh
 cmake -S . -B build && cmake --build build -j && ctest --test-dir build --output-on-failure   # host tests

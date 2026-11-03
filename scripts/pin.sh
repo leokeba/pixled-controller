@@ -1,14 +1,32 @@
 #!/usr/bin/env bash
-# Pins deps.lock to the siblings' commits: each one's HEAD in ../<repo>, or the
-# commit given as repo=sha (TesserUI=fc29e6a). Refuses a commit GitHub doesn't
-# have, since CI fetches from there. Then says where a sibling TesserKIT also
-# pins differs from TesserKIT's own deps.lock at the commit pinned here: the
-# firmware may run ahead of TesserKIT, but that combination is untested there.
+# Pins deps.lock and the siblings' reusable workflows to the commits: each
+# one's HEAD in ../<repo>, or the commit given as repo=sha. Refuses a commit
+# GitHub doesn't have, since CI fetches from there. With --check, fails if a
+# workflow ref differs from deps.lock.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 lock=deps.lock
+workflows=(.github/workflows/*.yml)
 pins() { grep -E '^[^#[:space:]]+@[0-9a-f]{40}$' "$lock"; }
+
+check() {
+    local ok=0 repo sha line
+    while IFS=@ read -r repo sha; do
+        while IFS= read -r line; do
+            if [ "${line##*@}" != "$sha" ]; then
+                echo "$line: deps.lock pins ${repo#*/} $sha" >&2
+                ok=1
+            fi
+        done < <(grep -HnE "^[[:space:]]*(-[[:space:]]*)?uses:[[:space:]]*$repo/" "${workflows[@]}" || true)
+    done < <(pins)
+    return "$ok"
+}
+
+if [ "${1:-}" = "--check" ]; then
+    check && echo "Reusable workflow refs match deps.lock"
+    exit
+fi
 
 out=$(mktemp)
 grep -E '^#' "$lock" > "$out"
@@ -34,6 +52,11 @@ while IFS=@ read -r repo old; do
     echo "$repo@$sha" >> "$out"
 done < <(pins)
 mv "$out" "$lock"
+
+while IFS=@ read -r repo sha; do
+    perl -pi -e "s{^(\s*(?:-\s*)?uses:\s*\Q$repo\E/[^@\s]+)\@\S+}{\$1\@$sha}" "${workflows[@]}"
+done < <(pins)
+check && echo "Reusable workflow refs match deps.lock"
 
 kit=$(sed -n 's|^leokeba/TesserKIT@||p' "$lock")
 kit_lock=$(git -C ../TesserKIT show "$kit:deps.lock" 2>/dev/null) || {
